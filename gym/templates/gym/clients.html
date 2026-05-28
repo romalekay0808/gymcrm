@@ -1,0 +1,71 @@
+{% extends "gym/base.html" %}
+
+{% block title %}Клієнти{% endblock %}
+
+{% block content %}
+
+<h1>Клієнти</h1>
+<input
+    type="text"
+    id="clientSearch"
+    placeholder="🔍 Пошук клієнта..."
+    style="
+        width:300px;
+        padding:10px;
+        margin-bottom:20px;
+        border-radius:10px;
+        border:1px solid #ccc;
+    "
+>
+<a href="/clients/add/" class="export-btn">
+    ➕ Додати клієнта
+</a>
+
+<<table id="clientsTable">
+    <tr>
+        <th>Ім'я</th>
+        <th>Остання послуга</th>
+        <th>Дата додавання</th>
+        <th>Дії</th>
+    </tr>
+
+    {% for client in clients %}
+    <tr>
+        <td>{{ client.name }}</td>
+        <td>
+            {% with training=client.training_set.last %}
+                {% if training %}
+                    {{ training.get_training_type_display }}
+                {% else %}
+                    —
+                {% endif %}
+            {% endwith %}
+        </td>
+        <td>{{ client.created_at }}</td>
+        <td>
+            <a href="/clients/{{ client.id }}/edit/">✏️ Редагувати</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+<script>
+document.getElementById("clientSearch").addEventListener("keyup", function() {
+
+    let value = this.value.toLowerCase();
+
+    let rows = document.querySelectorAll("#clientsTable tr");
+
+    rows.forEach((row, index) => {
+
+        if(index === 0) return;
+
+        let text = row.innerText.toLowerCase();
+
+        row.style.display = text.includes(value)
+            ? ""
+            : "none";
+    });
+
+});
+</script>
+{% endblock %}

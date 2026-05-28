@@ -1,0 +1,18 @@
+{% extends "gym/base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+
+<h1>{{ title }}</h1>
+
+<form method="post" class="filter-form">
+    {% csrf_token %}
+
+    {{ form.as_p }}
+
+    <button type="submit">Зберегти</button>
+    <a href="/finances/">Назад</a>
+</form>
+
+{% endblock %}

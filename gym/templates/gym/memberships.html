@@ -1,0 +1,203 @@
+{% extends "gym/base.html" %}
+
+{% block title %}Абонементи{% endblock %}
+
+{% block content %}
+
+<h1>Абонементи</h1>
+
+<form method="get" class="filter-form">
+
+    <input
+        type="text"
+        name="search"
+        placeholder="Пошук клієнта..."
+        value="{{ search|default:'' }}"
+    >
+
+    <select name="trainer">
+        <option value="">Всі тренери</option>
+
+        {% for trainer in trainers %}
+            <option value="{{ trainer.id }}"
+                {% if selected_trainer == trainer.id|stringformat:"s" %}
+                    selected
+                {% endif %}
+            >
+                {{ trainer.name }}
+            </option>
+        {% endfor %}
+    </select>
+
+    <select name="status">
+        <option value="">Всі статуси</option>
+
+        <option value="active" {% if selected_status == "active" %}selected{% endif %}>
+            Активні
+        </option>
+
+        <option value="expiring" {% if selected_status == "expiring" %}selected{% endif %}>
+            Скоро закінчуються
+        </option>
+
+        <option value="expired" {% if selected_status == "expired" %}selected{% endif %}>
+            Закінчені
+        </option>
+    </select>
+
+    <button type="submit">Фільтр</button>
+    <a href="/memberships/">Скинути</a>
+
+</form>
+
+<div class="membership-grid">
+
+    {% for item in memberships %}
+
+        <div class="membership-card
+            {% if item.days_left > 5 %}
+                active
+            {% elif item.days_left >= 0 %}
+                expiring
+            {% else %}
+                expired
+            {% endif %}
+        ">
+
+            <div class="membership-top">
+                <h3>{{ item.membership.client.name }}</h3>
+
+                {% if item.days_left > 5 %}
+                    <span class="status-badge badge-green">Активний</span>
+                {% elif item.days_left >= 0 %}
+                    <span class="status-badge badge-yellow">Скоро</span>
+                {% else %}
+                    <span class="status-badge badge-red">Закінчився</span>
+                {% endif %}
+            </div>
+
+            <div class="membership-info">
+                <p>👨‍🏫 {{ item.membership.trainer.name }}</p>
+                <p>🎫 {{ item.membership.name }}</p>
+                <p>💰 {{ item.membership.price|floatformat:0 }} грн</p>
+                <p>📅 До: {{ item.membership.end_date }}</p>
+
+                {% if item.days_left > 5 %}
+                    <p>🟢 Залишилось: {{ item.days_left }} днів</p>
+                {% elif item.days_left >= 0 %}
+                    <p>🟡 Закінчується через: {{ item.days_left }} днів</p>
+                {% else %}
+                    <p>🔴 Закінчився {{ item.days_left|add:"0"|cut:"-" }} днів тому</p>
+                {% endif %}
+            </div>
+
+        </div>
+
+    {% empty %}
+
+        <p>Нічого не знайдено.</p>
+
+    {% endfor %}
+
+</div>
+
+<style>
+    .membership-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 22px;
+    }
+
+    .membership-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 24px;
+        box-shadow: 0 8px 24px rgba(15,23,42,.08);
+        transition: .2s;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .membership-card:hover {
+        transform: translateY(-3px);
+    }
+
+    .membership-card::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 6px;
+        height: 100%;
+    }
+
+    .membership-card.active::before {
+        background: #22c55e;
+    }
+
+    .membership-card.expiring::before {
+        background: #f59e0b;
+    }
+
+    .membership-card.expired::before {
+        background: #ef4444;
+    }
+
+    .membership-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 18px;
+    }
+
+    .membership-top h3 {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 800;
+    }
+
+    .status-badge {
+        padding: 7px 12px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .badge-green {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .badge-yellow {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .badge-red {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .membership-info p {
+        margin: 10px 0;
+        color: var(--muted);
+        font-weight: 600;
+    }
+
+    @media (max-width: 1200px) {
+        .membership-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 800px) {
+        .membership-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+{% endblock %}

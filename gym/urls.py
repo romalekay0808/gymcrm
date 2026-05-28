@@ -1,0 +1,36 @@
+from django.urls import path
+from .views import (
+    home,
+    reports,
+    trainers_page,
+    clients_page,
+    finances_page,
+    memberships_page,
+    export_reports_excel,
+    export_reports_pdf,
+    export_backup_excel,
+    trainer_add,
+    trainer_edit,
+    expense_add,
+    expense_edit,
+    client_add,
+    client_edit,
+)
+
+urlpatterns = [
+    path("", home, name="home"),
+    path("reports/", reports, name="reports"),
+    path("trainers/", trainers_page, name="trainers"),
+    path("clients/", clients_page, name="clients"),
+    path("finances/", finances_page, name="finances"),
+    path("memberships/", memberships_page, name="memberships"),
+    path("reports/export/", export_reports_excel, name="export_reports_excel"),
+    path("reports/export/pdf/", export_reports_pdf, name="export_reports_pdf"),
+    path("backup/export/", export_backup_excel, name="export_backup_excel"),
+    path("trainers/add/", trainer_add, name="trainer_add"),
+    path("trainers/<int:trainer_id>/edit/", trainer_edit, name="trainer_edit"),
+    path("expenses/add/", expense_add, name="expense_add"),
+    path("expenses/<int:expense_id>/edit/", expense_edit, name="expense_edit"),
+    path("clients/add/", client_add, name="client_add"),
+    path("clients/<int:client_id>/edit/", client_edit, name="client_edit"),
+]

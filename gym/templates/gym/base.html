@@ -1,0 +1,462 @@
+
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}Gym CRM{% endblock %}</title>
+
+    <style>
+
+        :root{
+            --bg:#f3f4f6;
+            --card:#ffffff;
+            --text:#0f172a;
+            --muted:#64748b;
+            --border:#e2e8f0;
+            --sidebar:#0f172a;
+            --sidebar-hover:#1e293b;
+        }
+
+        body.dark-theme{
+            --bg:#020617;
+            --card:#0f172a;
+            --text:#f8fafc;
+            --muted:#94a3b8;
+            --border:#1e293b;
+            --sidebar:#020617;
+            --sidebar-hover:#111827;
+        }
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+        }
+
+        body{
+            font-family:Arial,sans-serif;
+            background:var(--bg);
+            color:var(--text);
+        }
+
+        .layout{
+            display:flex;
+            min-height:100vh;
+        }
+
+        /* =========================
+           SIDEBAR
+        ========================= */
+
+        .sidebar{
+            width:240px;
+            background:var(--sidebar);
+            color:white;
+            padding:24px;
+            position:fixed;
+            top:0;
+            left:0;
+            bottom:0;
+            overflow-y:auto;
+        }
+
+        .logo{
+            font-size:28px;
+            font-weight:bold;
+            margin-bottom:30px;
+        }
+
+        .nav-link{
+            display:block;
+            color:white;
+            text-decoration:none;
+            padding:14px 16px;
+            border-radius:14px;
+            margin-bottom:10px;
+            transition:.2s;
+            font-weight:bold;
+        }
+
+        .nav-link:hover{
+            background:var(--sidebar-hover);
+        }
+
+        .theme-toggle{
+            margin-top:20px;
+            width:100%;
+            border:none;
+            background:#1e293b;
+            color:white;
+            padding:14px;
+            border-radius:14px;
+            cursor:pointer;
+            font-weight:bold;
+        }
+
+        /* =========================
+           MAIN
+        ========================= */
+
+        .main{
+            flex:1;
+            margin-left:240px;
+            padding:30px;
+            width:calc(100% - 240px);
+        }
+
+        h1{
+            font-size:42px;
+            margin-bottom:30px;
+        }
+
+        h2{
+            font-size:32px;
+            margin-bottom:24px;
+            margin-top:10px;
+        }
+
+        /* =========================
+           FILTERS
+        ========================= */
+
+        .filter-form{
+            background:var(--card);
+            border:1px solid var(--border);
+            border-radius:22px;
+            padding:20px;
+            margin-bottom:30px;
+            box-shadow:0 8px 24px rgba(15,23,42,.06);
+        }
+
+        .filter-form input,
+        .filter-form select,
+        .filter-form button{
+            padding:12px 14px;
+            border-radius:12px;
+            border:1px solid var(--border);
+            background:var(--card);
+            color:var(--text);
+            margin-right:10px;
+        }
+
+        .filter-form button{
+            background:#2563eb;
+            color:white;
+            border:none;
+            cursor:pointer;
+            font-weight:bold;
+        }
+
+        /* =========================
+           BUTTONS
+        ========================= */
+
+        .export-btn,
+        .pdf-btn,
+        .backup-btn{
+            display:inline-block;
+            color:white;
+            text-decoration:none;
+            padding:12px 18px;
+            border-radius:14px;
+            margin-bottom:20px;
+            font-weight:bold;
+        }
+
+        .export-btn{
+            background:#16a34a;
+        }
+
+        .pdf-btn{
+            background:#dc2626;
+            margin-left:10px;
+        }
+
+        .backup-btn{
+            background:#2563eb;
+            margin-left:10px;
+        }
+
+        /* =========================
+           TABLES
+        ========================= */
+
+        .table-wrap{
+            width:100%;
+            overflow-x:auto;
+            margin-bottom:40px;
+            border-radius:18px;
+            -webkit-overflow-scrolling:touch;
+        }
+
+        table{
+            width:100%;
+            border-collapse:collapse;
+            background:var(--card);
+            border-radius:18px;
+            overflow:hidden;
+            box-shadow:0 8px 24px rgba(15,23,42,.06);
+            border:1px solid var(--border);
+        }
+
+        th{
+            background:#0f172a;
+            color:white;
+            padding:16px;
+            text-align:left;
+            font-size:14px;
+        }
+
+        td{
+            padding:16px;
+            border-bottom:1px solid var(--border);
+        }
+
+        tr:last-child td{
+            border-bottom:none;
+        }
+
+        /* =========================
+           CARDS
+        ========================= */
+
+        .cards,
+        .kpi-grid,
+        .chart-grid,
+        .membership-grid{
+            display:grid;
+            grid-template-columns:repeat(3,1fr);
+            gap:22px;
+            margin-bottom:40px;
+        }
+
+        .card,
+        .kpi-card,
+        .chart-card,
+        .membership-card{
+            background:var(--card);
+            border:1px solid var(--border);
+            border-radius:22px;
+            padding:24px;
+            box-shadow:0 8px 24px rgba(15,23,42,.06);
+        }
+
+        /* =========================
+           MOBILE
+        ========================= */
+
+        @media (max-width:1000px){
+
+            .layout{
+                display:block;
+            }
+
+            .sidebar{
+                position:static;
+                width:100%;
+                max-width:100%;
+                padding:18px;
+                border-radius:0 0 24px 24px;
+            }
+
+            .main{
+                margin-left:0;
+                width:100%;
+                padding:16px;
+            }
+
+            h1{
+                font-size:30px;
+            }
+
+            h2{
+                font-size:24px;
+            }
+
+            .cards,
+            .kpi-grid,
+            .chart-grid,
+            .membership-grid{
+                grid-template-columns:1fr !important;
+                gap:16px;
+            }
+
+            .card,
+            .kpi-card,
+            .chart-card,
+            .membership-card{
+                padding:18px !important;
+                border-radius:18px;
+            }
+
+            .filter-form{
+                display:flex;
+                flex-direction:column;
+                gap:12px;
+            }
+
+            .filter-form input,
+            .filter-form select,
+            .filter-form button,
+            .filter-form a{
+                width:100%;
+                margin:0 !important;
+            }
+
+            .nav-link{
+                display:block;
+                width:100%;
+                margin-bottom:8px;
+            }
+
+            .theme-toggle{
+                width:100%;
+            }
+
+            canvas{
+                max-height:260px !important;
+            }
+
+            .table-wrap table{
+                min-width:700px;
+            }
+
+            th,
+            td{
+                padding:10px !important;
+                font-size:13px !important;
+                white-space:nowrap;
+            }
+        }
+
+        @media (max-width:600px){
+            html, body{
+                width:100%;
+                max-width:100%;
+                overflow-x:hidden;
+            }
+
+            .main{
+                width:100%;
+                max-width:100%;
+                overflow:hidden;
+            }
+
+            .sidebar{
+                width:100%;
+                max-width:100%;
+                overflow:hidden;
+            }
+
+            .card,
+            .kpi-card,
+            .chart-card,
+            .membership-card,
+            .filter-form{
+                width:100%;
+                max-width:100%;
+            }
+
+            .export-btn,
+            .pdf-btn,
+            .backup-btn{
+                width:100%;
+                text-align:center;
+                margin-left:0 !important;
+            }
+            body{
+                font-size:14px;
+            }
+
+            .main{
+                padding:12px;
+            }
+
+            h1{
+                font-size:26px;
+            }
+
+            h2{
+                font-size:22px;
+            }
+
+            .table-wrap table{
+                min-width:600px;
+            }
+
+            th,
+            td{
+                font-size:12px !important;
+                padding:8px !important;
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="layout">
+
+    <aside class="sidebar">
+
+        <div class="logo">
+            🏋️ Gym CRM
+        </div>
+
+        <a href="/" class="nav-link">📊 Dashboard</a>
+        <a href="/trainers/" class="nav-link">👨‍🏫 Тренери</a>
+        <a href="/clients/" class="nav-link">👥 Клієнти</a>
+        <a href="/memberships/" class="nav-link">🎫 Абонементи</a>
+        <a href="/finances/" class="nav-link">💰 Фінанси</a>
+        <a href="/reports/" class="nav-link">📑 Звіти</a>
+        <a href="/admin/" class="nav-link">⚙️ Адмінка</a>
+
+        <button class="theme-toggle" onclick="toggleTheme()">
+            🌙 / ☀️ Тема
+        </button>
+
+    </aside>
+
+    <main class="main">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+</div>
+
+<script>
+
+    function applyTheme(){
+
+        const theme = localStorage.getItem("theme");
+
+        if(theme === "dark"){
+            document.body.classList.add("dark-theme");
+        }else{
+            document.body.classList.remove("dark-theme");
+        }
+    }
+
+    function toggleTheme(){
+
+        const isDark = document.body.classList.contains("dark-theme");
+
+        if(isDark){
+            localStorage.setItem("theme","light");
+        }else{
+            localStorage.setItem("theme","dark");
+        }
+
+        applyTheme();
+    }
+
+    applyTheme();
+
+</script>
+
+</body>
+</html>
+```

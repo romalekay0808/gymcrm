@@ -1,0 +1,62 @@
+{% extends "gym/base.html" %}
+
+{% block title %}Фінанси{% endblock %}
+
+{% block content %}
+
+<h1>Фінанси залу</h1>
+<a href="/expenses/add/" class="export-btn">
+    ➕ Додати витрату
+</a>
+<div class="cards">
+    <div class="card">
+        <h2>Загальний дохід</h2>
+        <p>{{ total_income }} грн</p>
+    </div>
+
+    <div class="card">
+        <h2>ЗП тренерам</h2>
+        <p>{{ total_trainer_salary|floatformat:0 }} грн</p>
+    </div>
+
+    <div class="card">
+        <h2>Залу після %</h2>
+        <p>{{ gym_net_income|floatformat:0 }} грн</p>
+    </div>
+
+    <div class="card">
+        <h2>Витрати</h2>
+        <p>{{ total_expense }} грн</p>
+    </div>
+
+    <div class="card">
+        <h2>Чистий прибуток</h2>
+        <p>{{ clean_profit|floatformat:0 }} грн</p>
+    </div>
+</div>
+
+<h2>Витрати</h2>
+
+<table>
+    <tr>
+        <th>Дата</th>
+        <th>Категорія</th>
+        <th>Сума</th>
+        <th>Коментар</th>
+        <th>Дії</th>
+    </tr>
+
+    {% for expense in expenses %}
+    <tr>
+        <td>{{ expense.date }}</td>
+        <td>{{ expense.get_category_display }}</td>
+        <td>{{ expense.amount }} грн</td>
+        <td>{{ expense.comment }}</td>
+        <td>
+            <a href="/expenses/{{ expense.id }}/edit/">✏️ Редагувати</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

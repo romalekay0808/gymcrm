@@ -1,0 +1,43 @@
+{% extends "gym/base.html" %}
+
+{% block title %}Тренери{% endblock %}
+
+{% block content %}
+
+<h1>Тренери</h1>
+
+<a href="/trainers/add/" class="export-btn">
+    ➕ Додати тренера
+</a>
+
+<table>
+    <tr>
+        <th>Ім'я</th>
+        <th>Телефон</th>
+        <th>Telegram ID</th>
+        <th>% персональні</th>
+        <th>% спліт</th>
+        <th>% абонементи</th>
+        <th>% разові</th>
+        <th>% УБД</th>
+        <th>Дії</th>
+    </tr>
+
+    {% for trainer in trainers %}
+    <tr>
+        <td>{{ trainer.name }}</td>
+        <td>{{ trainer.phone }}</td>
+        <td>{{ trainer.telegram_id }}</td>
+        <td>{{ trainer.personal_percent|floatformat:0 }}</td>
+        <td>{{ trainer.split_percent|floatformat:0 }}</td>
+        <td>{{ trainer.membership_percent|floatformat:0 }}</td>
+        <td>{{ trainer.single_percent|floatformat:0 }}</td>
+        <td>{{ trainer.ubd_percent|floatformat:0 }}</td>
+        <td>
+            <a href="/trainers/{{ trainer.id }}/edit/">✏️ Редагувати</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

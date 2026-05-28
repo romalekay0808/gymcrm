@@ -1,0 +1,392 @@
+{% extends "gym/base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<h1>Gym CRM — Аналітика</h1>
+
+<form method="get" class="filter-form">
+    <label>Від:</label>
+    <input type="date" name="start_date" value="{{ start_date }}">
+
+    <label>До:</label>
+    <input type="date" name="end_date" value="{{ end_date }}">
+
+    <button type="submit">Фільтрувати</button>
+    <a href="/">Скинути</a>
+</form>
+
+<div class="kpi-grid">
+    <div class="kpi-card blue">
+        <div class="kpi-icon">💰</div>
+        <div>
+            <span>Загальний дохід</span>
+            <strong>{{ total_income|floatformat:0 }} грн</strong>
+        </div>
+    </div>
+
+    <div class="kpi-card purple">
+        <div class="kpi-icon">👨‍🏫</div>
+        <div>
+            <span>Зарплата тренерам</span>
+            <strong>{{ total_trainer_salary|floatformat:0 }} грн</strong>
+        </div>
+    </div>
+
+    <div class="kpi-card green">
+        <div class="kpi-icon">🏢</div>
+        <div>
+            <span>Дохід залу</span>
+            <strong>{{ gym_net_income|floatformat:0 }} грн</strong>
+        </div>
+    </div>
+
+    <div class="kpi-card red">
+        <div class="kpi-icon">📉</div>
+        <div>
+            <span>Витрати</span>
+            <strong>{{ total_expense|floatformat:0 }} грн</strong>
+        </div>
+    </div>
+
+    <div class="kpi-card orange">
+        <div class="kpi-icon">📈</div>
+        <div>
+            <span>Чистий прибуток</span>
+            <strong>{{ clean_profit|floatformat:0 }} грн</strong>
+        </div>
+    </div>
+
+    <div class="kpi-card cyan">
+        <div class="kpi-icon">🏋️</div>
+        <div>
+            <span>Персональні</span>
+            <strong>{{ personal_count|floatformat:0 }}</strong>
+        </div>
+    </div>
+
+    <div class="kpi-card yellow">
+        <div class="kpi-icon">🎫</div>
+        <div>
+            <span>Абонементи</span>
+            <strong>{{ membership_count|floatformat:0 }}</strong>
+        </div>
+    </div>
+
+    <div class="kpi-card slate">
+        <div class="kpi-icon">👥</div>
+        <div>
+            <span>Клієнтів</span>
+            <strong>{{ total_clients|floatformat:0 }}</strong>
+        </div>
+    </div>
+
+    <div class="kpi-card slate">
+        <div class="kpi-icon">⭐</div>
+        <div>
+            <span>Тренерів</span>
+            <strong>{{ total_trainers|floatformat:0 }}</strong>
+        </div>
+    </div>
+</div>
+
+<h2>Графіки</h2>
+
+<div class="chart-grid">
+    <div class="chart-card">
+        <h2>Дохід по днях</h2>
+        <canvas id="incomeChart"></canvas>
+    </div>
+
+    <div class="chart-card">
+        <h2>Продажі по тренерах</h2>
+        <canvas id="trainersChart"></canvas>
+    </div>
+
+    <div class="chart-card">
+        <h2>Абонементи по місяцях</h2>
+        <canvas id="membershipsChart"></canvas>
+    </div>
+</div>
+
+<h2>Загальна статистика по напрямках</h2>
+
+<div class="table-wrap">
+    <table>
+        <tr>
+            <th>Напрямок</th>
+            <th>Кількість</th>
+            <th>Сума</th>
+        </tr>
+
+        {% for key, item in stats_by_type.items %}
+        <tr>
+            <td>{{ item.name }}</td>
+            <td>{{ item.count }}</td>
+            <td>{{ item.sum|floatformat:0 }} грн</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+<h2>Статистика по тренерах</h2>
+
+<div class="table-wrap">
+    <table>
+        <tr>
+            <th>Тренер</th>
+            <th>Всього</th>
+            <th>Абонементи</th>
+            <th>Персональні</th>
+            <th>Спліт</th>
+            <th>Разові</th>
+            <th>УБД</th>
+            <th>Сума</th>
+            <th>ЗП тренера</th>
+            <th>Залу</th>
+        </tr>
+
+        {% for row in trainers_stats %}
+        <tr>
+            <td>{{ row.trainer.name }}</td>
+            <td>{{ row.total_count }}</td>
+            <td>{{ row.membership_count }} / {{ row.membership_sum|floatformat:0 }} грн</td>
+            <td>{{ row.personal_count }} / {{ row.personal_sum|floatformat:0 }} грн</td>
+            <td>{{ row.split_count }} / {{ row.split_sum|floatformat:0 }} грн</td>
+            <td>{{ row.single_count }} / {{ row.single_sum|floatformat:0 }} грн</td>
+            <td>{{ row.ubd_count }} / {{ row.ubd_sum|floatformat:0 }} грн</td>
+            <td>{{ row.total_sum|floatformat:0 }} грн</td>
+            <td>{{ row.trainer_salary|floatformat:0 }} грн</td>
+            <td>{{ row.gym_income|floatformat:0 }} грн</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+<h2>Баланс з тренерами</h2>
+
+<div class="table-wrap">
+    <table>
+        <tr>
+            <th>Тренер</th>
+            <th>Гроші у тренера</th>
+            <th>ЗП тренера</th>
+            <th>Тренер вже здав залу</th>
+            <th>Зал вже виплатив</th>
+            <th>Тренер має здати</th>
+            <th>Зал має виплатити</th>
+            <th>На карті залу</th>
+        </tr>
+
+        {% for row in trainers_stats %}
+        <tr>
+            <td>{{ row.trainer.name }}</td>
+            <td>{{ row.money_in_trainer|floatformat:0 }} грн</td>
+            <td>{{ row.trainer_salary|floatformat:0 }} грн</td>
+            <td>{{ row.trainer_to_gym_paid|floatformat:0 }} грн</td>
+            <td>{{ row.gym_to_trainer_paid|floatformat:0 }} грн</td>
+            <td>{{ row.trainer_must_pay|floatformat:0 }} грн</td>
+            <td>{{ row.gym_must_pay|floatformat:0 }} грн</td>
+            <td>{{ row.money_on_gym_card|floatformat:0 }} грн</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+<h2>Останні тренування / продажі</h2>
+
+<div class="table-wrap">
+    <table>
+        <tr>
+            <th>Дата</th>
+            <th>Клієнт</th>
+            <th>Тренер</th>
+            <th>Тип</th>
+            <th>Оплата</th>
+            <th>Сума</th>
+            <th>ЗП тренера</th>
+            <th>Залу</th>
+        </tr>
+
+        {% for training in latest_trainings %}
+        <tr>
+            <td>{{ training.date }}</td>
+            <td>{{ training.client }}</td>
+            <td>{{ training.trainer }}</td>
+            <td>{{ training.get_training_type_display }}</td>
+            <td>{{ training.get_payment_type_display }}</td>
+            <td>{{ training.amount|floatformat:0 }} грн</td>
+            <td>{{ training.trainer_income|floatformat:0 }} грн</td>
+            <td>{{ training.gym_income|floatformat:0 }} грн</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+<h2>Останні витрати</h2>
+
+<div class="table-wrap">
+    <table>
+        <tr>
+            <th>Дата</th>
+            <th>Категорія</th>
+            <th>Сума</th>
+            <th>Коментар</th>
+        </tr>
+
+        {% for expense in latest_expenses %}
+        <tr>
+            <td>{{ expense.date }}</td>
+            <td>{{ expense.get_category_display }}</td>
+            <td>{{ expense.amount|floatformat:0 }} грн</td>
+            <td>{{ expense.comment }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+<style>
+    .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 22px;
+        margin-bottom: 42px;
+    }
+
+    .kpi-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        padding: 24px;
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        box-shadow: 0 10px 28px rgba(15,23,42,.08);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .kpi-card::before {
+        content: "";
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: 6px;
+    }
+
+    .kpi-icon {
+        width: 54px;
+        height: 54px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 27px;
+        background: rgba(37,99,235,.12);
+    }
+
+    .kpi-card span {
+        display: block;
+        color: var(--muted);
+        font-weight: 800;
+        margin-bottom: 8px;
+    }
+
+    .kpi-card strong {
+        font-size: 29px;
+        line-height: 1.1;
+    }
+
+    .kpi-card.blue::before { background: #2563eb; }
+    .kpi-card.purple::before { background: #7c3aed; }
+    .kpi-card.green::before { background: #16a34a; }
+    .kpi-card.red::before { background: #dc2626; }
+    .kpi-card.orange::before { background: #f97316; }
+    .kpi-card.cyan::before { background: #06b6d4; }
+    .kpi-card.yellow::before { background: #eab308; }
+    .kpi-card.slate::before { background: #64748b; }
+
+    .chart-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 22px;
+        margin-bottom: 42px;
+    }
+
+    .chart-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        padding: 24px;
+        box-shadow: 0 10px 28px rgba(15,23,42,.08);
+    }
+
+    .chart-card h2 {
+        margin-top: 0;
+        font-size: 18px;
+        color: var(--muted);
+    }
+
+    @media (max-width: 1200px) {
+        .kpi-grid,
+        .chart-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 800px) {
+        .kpi-grid,
+        .chart-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const incomeLabels = JSON.parse('{{ income_labels|escapejs }}');
+    const incomeData = JSON.parse('{{ income_data|escapejs }}');
+
+    const trainerLabels = JSON.parse('{{ trainer_sales_labels|escapejs }}');
+    const trainerData = JSON.parse('{{ trainer_sales_data|escapejs }}');
+
+    const membershipLabels = JSON.parse('{{ membership_month_labels|escapejs }}');
+    const membershipData = JSON.parse('{{ membership_month_data|escapejs }}');
+
+    new Chart(document.getElementById("incomeChart"), {
+        type: "line",
+        data: {
+            labels: incomeLabels,
+            datasets: [{
+                label: "Дохід",
+                data: incomeData,
+                tension: 0.35
+            }]
+        }
+    });
+
+    new Chart(document.getElementById("trainersChart"), {
+        type: "bar",
+        data: {
+            labels: trainerLabels,
+            datasets: [{
+                label: "Продажі",
+                data: trainerData
+            }]
+        }
+    });
+
+    new Chart(document.getElementById("membershipsChart"), {
+        type: "bar",
+        data: {
+            labels: membershipLabels,
+            datasets: [{
+                label: "Абонементи",
+                data: membershipData
+            }]
+        }
+    });
+</script>
+
+{% endblock %}

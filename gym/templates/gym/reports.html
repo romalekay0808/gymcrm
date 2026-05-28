@@ -1,0 +1,119 @@
+{% extends "gym/base.html" %}
+
+{% block title %}Звіти{% endblock %}
+
+{% block content %}
+
+<h1>Звіти</h1>
+
+<a href="/reports/export/" class="export-btn">
+    ⬇️ Експорт Excel
+</a>
+
+<a href="/reports/export/pdf/" class="pdf-btn">
+    ⬇️ Експорт PDF
+</a>
+
+<a href="/backup/export/" class="backup-btn">
+    💾 Backup CRM
+</a>
+
+<form method="get" class="filter-form">
+    <label>Тренер:</label>
+
+    <select name="trainer">
+        <option value="">Всі тренери</option>
+
+        {% for trainer in trainers %}
+        <option value="{{ trainer.id }}" {% if selected_trainer == trainer.id|stringformat:"s" %}selected{% endif %}>
+            {{ trainer.name }}
+        </option>
+        {% endfor %}
+    </select>
+
+    <label>Від:</label>
+    <input type="date" name="start_date" value="{{ start_date }}">
+
+    <label>До:</label>
+    <input type="date" name="end_date" value="{{ end_date }}">
+
+    <button type="submit">Показати</button>
+    <a href="/reports/">Скинути</a>
+</form>
+
+<div class="cards">
+    <div class="card">
+        <h2>Загальний дохід</h2>
+        <p>{{ total_income|floatformat:0 }} грн</p>
+    </div>
+
+    <div class="card">
+        <h2>ЗП тренерам</h2>
+        <p>{{ total_trainer_salary|floatformat:0 }} грн</p>
+    </div>
+
+    <div class="card">
+        <h2>Залу після %</h2>
+        <p>{{ gym_net_income|floatformat:0 }} грн</p>
+    </div>
+
+    <div class="card">
+        <h2>Витрати</h2>
+        <p>{{ total_expense|floatformat:0 }} грн</p>
+    </div>
+
+    <div class="card">
+        <h2>Чистий прибуток</h2>
+        <p>{{ clean_profit|floatformat:0 }} грн</p>
+    </div>
+</div>
+
+<h2>Тренування / продажі</h2>
+
+<table>
+    <tr>
+        <th>Дата</th>
+        <th>Клієнт</th>
+        <th>Тренер</th>
+        <th>Тип</th>
+        <th>Оплата</th>
+        <th>Сума</th>
+        <th>ЗП тренера</th>
+        <th>Залу</th>
+    </tr>
+
+    {% for training in trainings %}
+    <tr>
+        <td>{{ training.date }}</td>
+        <td>{{ training.client }}</td>
+        <td>{{ training.trainer }}</td>
+        <td>{{ training.get_training_type_display }}</td>
+        <td>{{ training.get_payment_type_display }}</td>
+        <td>{{ training.amount|floatformat:0 }} грн</td>
+        <td>{{ training.trainer_income|floatformat:0 }} грн</td>
+        <td>{{ training.gym_income|floatformat:0 }} грн</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<h2>Витрати</h2>
+
+<table>
+    <tr>
+        <th>Дата</th>
+        <th>Категорія</th>
+        <th>Сума</th>
+        <th>Коментар</th>
+    </tr>
+
+    {% for expense in expenses %}
+    <tr>
+        <td>{{ expense.date }}</td>
+        <td>{{ expense.get_category_display }}</td>
+        <td>{{ expense.amount|floatformat:0 }} грн</td>
+        <td>{{ expense.comment }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}
