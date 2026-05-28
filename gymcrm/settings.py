@@ -78,8 +78,8 @@ WSGI_APPLICATION = 'gymcrm.wsgi.application'
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 DATABASES = {
-    "default": dj_database_url.config(
-        default=os.getenv("DATABASE_URL")
+    'default': dj_database_url.parse(
+        os.getenv("DATABASE_URL", "sqlite:///db.sqlite3")
     )
 }
 
