@@ -1,5 +1,6 @@
 import os
 import django
+import asyncio
 from dotenv import load_dotenv
 from asgiref.sync import sync_to_async
 from datetime import date, timedelta, datetime
@@ -1121,6 +1122,10 @@ def run_bot():
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, buttons))
 
     print("Telegram bot started...")
+
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
     app.run_polling()
 
 
