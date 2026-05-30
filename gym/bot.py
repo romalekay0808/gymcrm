@@ -6,7 +6,7 @@ from asgiref.sync import sync_to_async
 from datetime import date, timedelta, datetime
 from decimal import Decimal, InvalidOperation
 from django.db.models import Sum
-
+from django.db import close_old_connections
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from telegram import Update, ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup
@@ -62,11 +62,12 @@ def main_menu():
 
 @sync_to_async
 def get_trainer_by_telegram_id(telegram_id):
+    close_old_connections()
+
     try:
         return Trainer.objects.get(telegram_id=telegram_id)
     except Trainer.DoesNotExist:
         return None
-
 
 @sync_to_async
 def create_training(
@@ -77,6 +78,7 @@ def create_training(
     money_location,
     membership_start_date=None
 ):
+    close_old_connections()
     trainer = Trainer.objects.get(telegram_id=telegram_id)
     client, _ = Client.objects.get_or_create(name=client_name)
 
@@ -113,6 +115,7 @@ def create_training_for_client_id(
     money_location,
     membership_start_date=None
 ):
+    close_old_connections()
     trainer = Trainer.objects.get(telegram_id=telegram_id)
     client = Client.objects.get(id=client_id)
 
@@ -149,6 +152,7 @@ def create_training_for_client_id(
 
 @sync_to_async
 def create_settlement(telegram_id, settlement_type, amount, comment):
+    close_old_connections()
     trainer = Trainer.objects.get(telegram_id=telegram_id)
 
     Settlement.objects.create(
@@ -162,6 +166,7 @@ def create_settlement(telegram_id, settlement_type, amount, comment):
 
 @sync_to_async
 def get_trainer_stats(telegram_id, days):
+    close_old_connections()
     trainer = Trainer.objects.get(telegram_id=telegram_id)
     start_date = date.today() - timedelta(days=days)
 
@@ -198,6 +203,7 @@ def get_trainer_stats(telegram_id, days):
 
 @sync_to_async
 def get_expiring_memberships(telegram_id):
+    close_old_connections()
 
     trainer = Trainer.objects.get(telegram_id=telegram_id)
 
@@ -239,6 +245,7 @@ def get_expiring_memberships(telegram_id):
 
 @sync_to_async
 def get_trainer_balance(telegram_id):
+    close_old_connections()
     trainer = Trainer.objects.get(telegram_id=telegram_id)
 
     trainings = Training.objects.filter(trainer=trainer)
@@ -624,6 +631,7 @@ async def settlement_comment(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
 @sync_to_async
 def get_trainer_memberships(telegram_id):
+    close_old_connections()
     trainer = Trainer.objects.get(telegram_id=telegram_id)
 
     memberships = Membership.objects.filter(
@@ -969,6 +977,7 @@ async def renew_location(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 @sync_to_async
 def get_memberships_for_notifications():
+    close_old_connections()
     result = []
 
     memberships = Membership.objects.select_related(
